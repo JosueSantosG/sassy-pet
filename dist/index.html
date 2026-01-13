@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="es"> <head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="viewport" content="width=device-width"><meta name="generator" content="Astro v5.16.7"><title>My Sassy Pet</title><link rel="stylesheet" href="/_astro/index.DZZKpWu0.css"></head> <body class="bg-gray-100 flex items-center justify-center min-h-screen"> <div class="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm w-full"> <h1 class="text-2xl font-bold mb-4 text-gray-800">My Sassy Pet</h1> <!-- Contenedor de la Mascota --> <div id="pet-container" class="mb-6"> <!-- Burbuja de Mensaje --> <div class="bg-blue-50 p-4 rounded-xl mb-6 relative border border-blue-100"> <p id="pet-message" class="text-gray-700 italic">"..."</p> <!-- Triángulo de la burbuja --> <div class="absolute w-0 h-0 border-l-[10px] border-l-transparent border-t-[15px] border-t-blue-50 border-r-[10px] border-r-transparent left-1/2 transform -translate-x-1/2 -bottom-3"></div> </div> <div id="pet-emoji" class="text-9xl mb-2 transition-transform duration-300 transform hover:scale-110 cursor-pointer">
+<!DOCTYPE html><html lang="es"> <head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="viewport" content="width=device-width"><meta name="generator" content="Astro v5.16.7"><title>My Sassy Pet</title><link rel="stylesheet" href="/sassy-pet/_astro/index.CrKblOAT.css"></head> <body class="bg-gray-100 flex items-center justify-center min-h-screen"> <div class="absolute top-4 left-4 max-w-xs bg-amber-200 p-4 rounded-lg shadow-lg"> <h2 class="text-xl font-bold mb-2 text-gray-800">How It Works</h2> <ul class="list-disc list-inside mb-4 text-gray-700"> <li>If you don't interact for 5 minutes, it gets annoyed.</li> <li>If you don't interact for 12 hours, it feels abandoned.</li> <li>You can "feed" or "play" with it to improve its mood.</li> </ul> </div> <div class="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm w-full"> <h1 class="text-2xl font-bold mb-4 text-gray-800">My Sassy Pet</h1> <!-- Contenedor de la Mascota --> <div id="pet-container" class="mb-6"> <!-- Burbuja de Mensaje --> <div class="bg-blue-50 p-4 rounded-xl mb-6 relative border border-blue-100"> <p id="pet-message" class="text-gray-700 italic">"..."</p> <!-- Triángulo de la burbuja --> <div class="absolute w-0 h-0 border-l-[10px] border-l-transparent border-t-[15px] border-t-blue-50 border-r-[10px] border-r-transparent left-1/2 transform -translate-x-1/2 -bottom-3"></div> </div> <div id="pet-emoji" class="text-9xl mb-2 transition-transform duration-300 transform hover:scale-110 cursor-pointer">
 🐱
 </div> <br> <p id="pet-mood" class="text-lg font-semibold text-gray-600">
 Status: loading...
@@ -59,23 +59,22 @@ Last visit: <span id="last-visit">Never</span> </div> </div> <script type="modul
       // Función para obtener el estado de ánimo actual basado en el tiempo.
       function getMood(lastInteractionTimestamp) {
         const now = Date.now();
-        // Se calcula la diferencia de tiempo desde la última interacción
-        const diff = now - lastInteractionTimestamp;
-
-        // Si ha pasado menos tiempo que el umbral de "Molesto", está Feliz.
-        if (diff < THRESHOLD_ANNOYED) return "happy";
-        // Si ha pasado menos tiempo que el umbral de "Abandonado", está Molesta.
-        if (diff < THRESHOLD_ABANDONED) return "annoyed";
-        // Si ha pasado más tiempo, está Abandonada.
+        // Calcular la diferencia de tiempo desde la última interacción
+        const timeDiff = now - lastInteractionTimestamp;
+        // Si ha pasado menos tiempo que el umbral de "Molesto", está feliz
+        if (timeDiff < THRESHOLD_ANNOYED) return "happy";
+        // Si ha pasado menos tiempo que el umbral de "Abandonado", está molesto
+        if (timeDiff < THRESHOLD_ABANDONED) return "annoyed";
+        // Si ha pasado más tiempo, está abandonada
         return "abandoned";
       }
 
       // Función para guardar la interacción actual
       function saveInteraction() {
         const now = Date.now();
-        // Guardamos la marca de tiempo actual en el localStorage.
+        // Se guarda el tiempo actual en el localStorage
         localStorage.setItem("pet_last_interaction", now.toString());
-        updateUI(); // Actualizamos interfaz
+        updateUI(); // Se actualiza la interfaz tras la interacción
       }
 
       // Función auxiliar para obtener un mensaje aleatorio de un array dependiendo del estado.
@@ -103,10 +102,10 @@ Last visit: <span id="last-visit">Never</span> </div> </div> <script type="modul
         // Determinamos el estado actual
         const mood = getMood(lastInteraction);
 
-        // Actualizamos los elementos visuales según el estado
+        // Se actualizan los elementos visuales según el estado
         let moodText = "";
         let emoji = "";
-        let moodColorClass = ""; // Clase de color para el texto del estado
+        let moodColorClass = ""; // Color para el texto del estado
 
         switch (mood) {
           case "happy":
@@ -126,23 +125,22 @@ Last visit: <span id="last-visit">Never</span> </div> </div> <script type="modul
             break;
         }
 
-        // Aplicamos los cambios al DOM
+        // Se aplican los cambios al DOM
         ui.mood.textContent = `Estado: ${moodText}`;
         ui.mood.className = `text-lg font-semibold ${moodColorClass}`;
         ui.emoji.textContent = emoji;
 
-        // Actualizamos el mensaje (solo si el usuario interactúa o recarga,
+        // Se actualiza el mensaje (solo si el usuario interactúa o recarga,
         // para que no cambie solo por el timer, aunque aquí lo actualizamos en cada updateUI)
         ui.message.textContent = `"${getRandomMessage(mood)}"`;
 
-        // Formateamos la fecha de última visita para mostrarla
+        // Se formatea la fecha de última visita para mostrarla
         const date = new Date(lastInteraction);
         ui.lastVisit.textContent =
           date.toLocaleTimeString() + " " + date.toLocaleDateString();
       }
 
       // --- INTERACTIVIDAD ---
-
       // Asignamos la función saveInteraction a los botones.
       // Ambos botones hacen lo mismo: "resetean" el contador de atención.
       ui.btnFeed.addEventListener("click", () => {
