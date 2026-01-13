@@ -1,0 +1,163 @@
+<!DOCTYPE html><html lang="es"> <head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="viewport" content="width=device-width"><meta name="generator" content="Astro v5.16.7"><title>My Sassy Pet</title><link rel="stylesheet" href="/_astro/index.DZZKpWu0.css"></head> <body class="bg-gray-100 flex items-center justify-center min-h-screen"> <div class="bg-white p-8 rounded-lg shadow-lg text-center max-w-sm w-full"> <h1 class="text-2xl font-bold mb-4 text-gray-800">My Sassy Pet</h1> <!-- Contenedor de la Mascota --> <div id="pet-container" class="mb-6"> <!-- Burbuja de Mensaje --> <div class="bg-blue-50 p-4 rounded-xl mb-6 relative border border-blue-100"> <p id="pet-message" class="text-gray-700 italic">"..."</p> <!-- Triángulo de la burbuja --> <div class="absolute w-0 h-0 border-l-[10px] border-l-transparent border-t-[15px] border-t-blue-50 border-r-[10px] border-r-transparent left-1/2 transform -translate-x-1/2 -bottom-3"></div> </div> <div id="pet-emoji" class="text-9xl mb-2 transition-transform duration-300 transform hover:scale-110 cursor-pointer">
+🐱
+</div> <br> <p id="pet-mood" class="text-lg font-semibold text-gray-600">
+Status: loading...
+</p> </div> <!-- Botones de Acción --> <div class="flex gap-4 justify-center"> <button id="btn-feed" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-300">
+🍖 Feed
+</button> <button id="btn-play" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300">
+⚽ Play
+</button> </div> <div class="mt-6 text-xs text-gray-400">
+Last visit: <span id="last-visit">Never</span> </div> </div> <script type="module">
+      // --- CONSTANTES DE CONFIGURACIÓN ---
+      // Primero definí los tiempos límite en milisegundos para cada estado.
+      // 5 minutos = 5 * 60 segundos * 1000 milisegundos
+      const THRESHOLD_ANNOYED = 5 * 60 * 1000;
+      // 12 horas = 12 * 60 * 60 segundos * 1000 milisegundos
+      const THRESHOLD_ABANDONED = 12 * 60 * 60 * 1000;
+
+      // --- REFERENCIAS AL DOM (ELEMENTOS VISUALES) ---
+      // Referencié a los elementos HTML a modificar.
+      const ui = {
+        emoji: document.getElementById("pet-emoji"),
+        mood: document.getElementById("pet-mood"),
+        message: document.getElementById("pet-message"),
+        lastVisit: document.getElementById("last-visit"),
+        btnFeed: document.getElementById("btn-feed"),
+        btnPlay: document.getElementById("btn-play"),
+      };
+
+      // --- MESSAGES FOR EACH MOOD ---
+      const MESSAGES = {
+        happy: [
+          "Oh, look at you — actually paying attention.",
+          "Do you expect a trophy for this?",
+          "Mmm, acceptable.",
+          "Don't get used to me being nice.",
+          "Well, someone's feeling generous today.",
+          "What's it worth to you?",
+        ],
+        annoyed: [
+          "Do you have a watch or did it break?",
+          "Oh, look who decided to show up.",
+          "Honestly, I was better off without you.",
+          "My bowl doesn't fill itself, you know.",
+          "Busy scrolling memes, were you?",
+          "I almost called the authorities... almost.",
+        ],
+        abandoned: [
+          "Who even are you?",
+          "I've already forgotten your face.",
+          "I've planned my escape about fifty times.",
+          "The plastic plant pays more attention to me.",
+          "You came back? How disappointing.",
+          "I've already picked a new family — in my head.",
+        ],
+      };
+
+      // --- LÓGICA DEL ESTADO ---
+
+      // Función para obtener el estado de ánimo actual basado en el tiempo.
+      function getMood(lastInteractionTimestamp) {
+        const now = Date.now();
+        // Se calcula la diferencia de tiempo desde la última interacción
+        const diff = now - lastInteractionTimestamp;
+
+        // Si ha pasado menos tiempo que el umbral de "Molesto", está Feliz.
+        if (diff < THRESHOLD_ANNOYED) return "happy";
+        // Si ha pasado menos tiempo que el umbral de "Abandonado", está Molesta.
+        if (diff < THRESHOLD_ABANDONED) return "annoyed";
+        // Si ha pasado más tiempo, está Abandonada.
+        return "abandoned";
+      }
+
+      // Función para guardar la interacción actual
+      function saveInteraction() {
+        const now = Date.now();
+        // Guardamos la marca de tiempo actual en el localStorage.
+        localStorage.setItem("pet_last_interaction", now.toString());
+        updateUI(); // Actualizamos interfaz
+      }
+
+      // Función auxiliar para obtener un mensaje aleatorio de un array dependiendo del estado.
+      function getRandomMessage(mood) {
+        const messagesList = MESSAGES[mood];
+        const randomIndex = Math.floor(Math.random() * messagesList.length);
+        return messagesList[randomIndex];
+      }
+
+      // --- ACTUALIZACIÓN DE LA INTERFAZ ---
+
+      function updateUI() {
+        // Recuperamos el valor guardado. Si no existe, usamos el tiempo actual (primera visita).
+        const storedTime = localStorage.getItem("pet_last_interaction");
+        const lastInteraction = storedTime ? parseInt(storedTime) : Date.now();
+
+        // Si es la primera visita, guardamos el tiempo inicial.
+        if (!storedTime) {
+          localStorage.setItem(
+            "pet_last_interaction",
+            lastInteraction.toString()
+          );
+        }
+
+        // Determinamos el estado actual
+        const mood = getMood(lastInteraction);
+
+        // Actualizamos los elementos visuales según el estado
+        let moodText = "";
+        let emoji = "";
+        let moodColorClass = ""; // Clase de color para el texto del estado
+
+        switch (mood) {
+          case "happy":
+            moodText = "Happy";
+            emoji = "🐱";
+            moodColorClass = "text-green-600";
+            break;
+          case "annoyed":
+            moodText = "Annoyed";
+            emoji = "😾";
+            moodColorClass = "text-yellow-600";
+            break;
+          case "abandoned":
+            moodText = "Abandoned";
+            emoji = "😿";
+            moodColorClass = "text-red-600";
+            break;
+        }
+
+        // Aplicamos los cambios al DOM
+        ui.mood.textContent = `Estado: ${moodText}`;
+        ui.mood.className = `text-lg font-semibold ${moodColorClass}`;
+        ui.emoji.textContent = emoji;
+
+        // Actualizamos el mensaje (solo si el usuario interactúa o recarga,
+        // para que no cambie solo por el timer, aunque aquí lo actualizamos en cada updateUI)
+        ui.message.textContent = `"${getRandomMessage(mood)}"`;
+
+        // Formateamos la fecha de última visita para mostrarla
+        const date = new Date(lastInteraction);
+        ui.lastVisit.textContent =
+          date.toLocaleTimeString() + " " + date.toLocaleDateString();
+      }
+
+      // --- INTERACTIVIDAD ---
+
+      // Asignamos la función saveInteraction a los botones.
+      // Ambos botones hacen lo mismo: "resetean" el contador de atención.
+      ui.btnFeed.addEventListener("click", () => {
+        alert("You fed the pet... it reluctantly accepts.");
+        saveInteraction();
+      });
+
+      ui.btnPlay.addEventListener("click", () => {
+        alert("You try to play... it looks at you with disdain but plays.");
+        saveInteraction();
+      });
+
+      // Inicializamos la interfaz al cargar la página
+      updateUI();
+
+      // Se actualiza automáticamente cada minuto para reflejar cambios de estado en tiempo real
+      setInterval(updateUI, 60000);
+    </script> </body> </html>
